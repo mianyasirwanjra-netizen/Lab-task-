@@ -1,0 +1,109 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "38810085",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "--- Optimal Path Finding (A*) ---\n",
+      "Route: ['Start', 'Goal']\n"
+     ]
+    }
+   ],
+   "source": [
+    "from heapq import heappush as push_to_queue, heappop as pop_from_queue\n",
+    "\n",
+    "class NavigatorSystem:\n",
+    "    def __init__(self, route_map, h_data):\n",
+    "        self.routes = route_map\n",
+    "        self.h_values = h_data\n",
+    "\n",
+    "    def retrieve_successors(self, current_location):\n",
+    "        return self.routes.get(current_location, [])\n",
+    "\n",
+    "    def calculate_optimal_route(self, initial, target):\n",
+    "        queue_for_search = []\n",
+    "        push_to_queue(queue_for_search, (0, initial))\n",
+    "        \n",
+    "        cost_g = {initial: 0}\n",
+    "        \n",
+    "        predecessor = {initial: None}\n",
+    "        \n",
+    "        explored_nodes = set()\n",
+    "\n",
+    "        while queue_for_search:\n",
+    "            _, current_node = pop_from_queue(queue_for_search)\n",
+    "\n",
+    "            if current_node == target:\n",
+    "                final_path = []\n",
+    "                temp_node = current_node\n",
+    "                while temp_node is not None:\n",
+    "                    final_path.append(temp_node)\n",
+    "                    temp_node = predecessor[temp_node]\n",
+    "                return final_path[::-1]\n",
+    "\n",
+    "            explored_nodes.add(current_node)\n",
+    "\n",
+    "            for next_node, distance_weight in self.retrieve_successors(current_node):\n",
+    "                potential_g = cost_g[current_node] + distance_weight\n",
+    "\n",
+    "                if next_node in explored_nodes and potential_g >= cost_g.get(next_node, float(\"inf\")):\n",
+    "                    continue\n",
+    "\n",
+    "                if potential_g < cost_g.get(next_node, float(\"inf\")):\n",
+    "                    predecessor[next_node] = current_node\n",
+    "                    cost_g[next_node] = potential_g\n",
+    "                    \n",
+    "                    cost_f = potential_g + self.h_values.get(next_node, 0)\n",
+    "                    push_to_queue(queue_for_search, (cost_f, next_node))\n",
+    "\n",
+    "        return None\n",
+    "\n",
+    "map_data = {\n",
+    "    'Start': [('Junc1', 2), ('Junc2', 4), ('Goal', 6)],\n",
+    "    'Junc1': [('Goal', 4)],\n",
+    "    'Junc2': [('Goal', 11)]\n",
+    "}\n",
+    "\n",
+    "estimate_h = {\n",
+    "    'Start': 2,\n",
+    "    'Junc1': 1,\n",
+    "    'Junc2': 1,\n",
+    "    'Goal': 0\n",
+    "}\n",
+    "\n",
+    "navigation_system = NavigatorSystem(map_data, estimate_h)\n",
+    "best_route = navigation_system.calculate_optimal_route('Start', 'Goal')\n",
+    "\n",
+    "print(\"--- Optimal Path Finding (A*) ---\")\n",
+    "print(\"Route:\", best_route)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "base",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.12.7"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
